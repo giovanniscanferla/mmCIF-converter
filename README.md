@@ -20,4 +20,4 @@ This program allows you to convert a macromolecular CIF file, a protein for exam
 License
 ----
 
-Apache
+MIT
