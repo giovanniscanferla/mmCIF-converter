@@ -1,5 +1,5 @@
 {
-  "name": "mmCIF-converter",
+  "name": "mmcif-converter",
   "version": "1.0.0",
   "description": "A mmCIF file to JS Object parser that allows to create an object from the protein.cif file",
   "main": "index.js",
@@ -11,5 +11,12 @@
   "keywords": ["node", "npm", "CIF", "mmCIF", "PDB", "protein"],
   "dependencies": {
     "filereader": "^0.10.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giovanniscanferla/mmCIF-converter.git"
   }
 }
