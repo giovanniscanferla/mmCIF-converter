@@ -1,11 +1,19 @@
 const fs = require('fs');
 
+/**
+ * This is the only method in the package. Given the file path it returns an Object containing the mmCIF
+ * file informations.
+ * @param {String} file - file path
+ */
 function getObject(file) {
 
   var str = fs.readFileSync(file, 'utf8');
 
+  //DELETE COMMENTS AND VOID
   var fileArray = str.split("\n").map(str => str.trim()).filter(v => v != '').filter(v => !v.startsWith("#"));
 
+
+  //MERGE SEMICOLON LINES IN A UNIQUE ONE
   var semicolon = false;
   var sentence = "";
 
@@ -38,12 +46,14 @@ function getObject(file) {
   var dataname = "";
   var precArray = new Array();
 
+  //THIS FOREACH DIVIDES THE SINGLE BLOCKS AND ELABORATE THEM ONE AFTER ONE
   fileArray.forEach(line => {
 
     line = line.trim();
 
-    //IF THERE ARE MULTIPLE DATABLOCKS
+
     if (line.startsWith("data_") && firstBlock) {
+      //IF THERE ARE MULTIPLE DATABLOCKS
       datablockObj["datablock"] = line.split("data_").join("");
       firstBlock = false;
     } else if ((line.startsWith("data_") && !firstBlock)) {
@@ -54,7 +64,8 @@ function getObject(file) {
 
     } else {
 
-      if (line === "loop_") {
+
+      if (line === "loop_") { //LOOP START
 
         dataname = "";
         if (precArray.length > 0) datablockObj = {
@@ -64,13 +75,13 @@ function getObject(file) {
         precArray = new Array();
         isLoop = true;
 
-      } else if (dataname === "" && line.startsWith("_")) {
+      } else if (dataname === "" && line.startsWith("_")) { //NEW DATANAME IN LOOP OR FIRST DATANAME
 
         dataname = line.split(".")[0];
-        if (precArray.length > 0) elaborate(precArray, isLoop);
         precArray = new Array();
         precArray.push(line);
-      } else if (dataname !== "" && dataname !== line.split(".")[0] && line.startsWith("_")) {
+
+      } else if (dataname !== "" && dataname !== line.split(".")[0] && line.startsWith("_")) { //NEW DATANAME NO LOOP
 
         dataname = line.split(".")[0];
         datablockObj = {
@@ -82,7 +93,7 @@ function getObject(file) {
         isLoop = false;
 
 
-      } else {
+      } else { //INSIDE DATANAME
 
         precArray.push(line);
 
@@ -96,6 +107,12 @@ function getObject(file) {
 
 }
 
+
+/**
+ * This function elaborate the single block.
+ * @param {String[]} dataArray - the various lines
+ * @param {boolean} isLoop - is it a loop block?
+ */
 function elaborate(dataArray, isLoop) {
 
   var valueArray = new Array();
@@ -105,7 +122,7 @@ function elaborate(dataArray, isLoop) {
 
   var JSONObj = {};
 
-  if (isLoop) {
+  if (isLoop) { //BLOCK IS LOOP
 
     var contArray = new Array();
 
@@ -113,23 +130,23 @@ function elaborate(dataArray, isLoop) {
 
       line = line.trim();
 
-      if (line.startsWith("_")) {
+      if (line.startsWith("_")) { //DATANAME LINE
         dataName = line.split(".")[0];
         nameArray.push(line.split(".")[1]);
-      } else {
+      } else { //VALUES LINES
 
         var field = "";
         var controlChar = " ";
         var pushed = false;
 
-        for (let index = 0; index < line.length; index++) {
+        for (let index = 0; index < line.length; index++) { //SPLIT BY WHITE SPACES EXEPT BETWEEN "" AND ''. P.S. I HATE REGEX.
 
-          if (controlChar === " " && line.charAt(index) === "'") { // check '
+          if (controlChar === " " && line.charAt(index) === "'") { // OPEN '
 
             controlChar = "'";
             pushed = false;
 
-          } else if (controlChar === " " && line.charAt(index) === '"') { //check "
+          } else if (controlChar === " " && line.charAt(index) === '"') { // OpEN "
 
             controlChar = '"';
             pushed = false;
@@ -140,14 +157,14 @@ function elaborate(dataArray, isLoop) {
             field = "";
             pushed = true;
 
-          } else if (controlChar === "'" && line.charAt(index) === "'") {
+          } else if (controlChar === "'" && line.charAt(index) === "'") { // CLOSE '
 
             valueArray.push(field);
             field = "";
             controlChar = " ";
             pushed = true;
 
-          } else if (controlChar === '"' && line.charAt(index) === '"') {
+          } else if (controlChar === '"' && line.charAt(index) === '"') { // CLOSE "
 
             valueArray.push(field);
             field = "";
@@ -186,7 +203,7 @@ function elaborate(dataArray, isLoop) {
 
     JSONObj[dataName] = contArray;
 
-  } else {
+  } else { //NOT LOOP DATA
 
     var dataName = dataArray.join("").trim().split(".")[0];
 
