@@ -12,9 +12,6 @@
   "dependencies": {
     "filereader": "^0.10.3"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/giovanniscanferla/mmCIF-converter.git"

@@ -94,119 +94,123 @@ function getObject(file) {
 
   return fileObj;
 
+}
 
-  function elaborate(dataArray, isLoop) {
+function elaborate(dataArray, isLoop) {
 
-    var valueArray = new Array();
-    var nameArray = new Array();
+  var valueArray = new Array();
+  var nameArray = new Array();
 
-    var dataName = "";
+  var dataName = "";
 
-    var JSONObj = {};
+  var JSONObj = {};
 
-    if (isLoop) {
+  if (isLoop) {
 
-      var contArray = new Array();
+    var contArray = new Array();
 
-      dataArray.forEach(line => {
+    dataArray.forEach(line => {
 
-        line = line.trim();
+      line = line.trim();
 
-        if (line.startsWith("_")) {
-          dataName = line.split(".")[0];
-          nameArray.push(line.split(".")[1]);
-        } else {
+      if (line.startsWith("_")) {
+        dataName = line.split(".")[0];
+        nameArray.push(line.split(".")[1]);
+      } else {
 
-          var field = "";
-          var controlChar = " ";
-          var pushed = false;
+        var field = "";
+        var controlChar = " ";
+        var pushed = false;
 
-          for (let index = 0; index < line.length; index++) {
+        for (let index = 0; index < line.length; index++) {
 
-            if (controlChar === " " && line.charAt(index) === "'") { // check '
+          if (controlChar === " " && line.charAt(index) === "'") { // check '
 
-              controlChar = "'";
-              pushed = false;
+            controlChar = "'";
+            pushed = false;
 
-            } else if (controlChar === " " && line.charAt(index) === '"') { //check "
+          } else if (controlChar === " " && line.charAt(index) === '"') { //check "
 
-              controlChar = '"';
-              pushed = false;
+            controlChar = '"';
+            pushed = false;
 
-            } else if (controlChar === " " && line.charAt(index) === " ") {
+          } else if (controlChar === " " && line.charAt(index) === " ") {
 
-              if (field.trim() !== "") valueArray.push(field);
-              field = "";
-              pushed = true;
+            if (field.trim() !== "") valueArray.push(field);
+            field = "";
+            pushed = true;
 
-            } else if (controlChar === "'" && line.charAt(index) === "'") {
+          } else if (controlChar === "'" && line.charAt(index) === "'") {
 
-              valueArray.push(field);
-              field = "";
-              controlChar = " ";
-              pushed = true;
+            valueArray.push(field);
+            field = "";
+            controlChar = " ";
+            pushed = true;
 
-            } else if (controlChar === '"' && line.charAt(index) === '"') {
+          } else if (controlChar === '"' && line.charAt(index) === '"') {
 
-              valueArray.push(field);
-              field = "";
-              controlChar = " ";
-              pushed = true;
-            } else {
+            valueArray.push(field);
+            field = "";
+            controlChar = " ";
+            pushed = true;
+          } else {
 
-              field = field + line.charAt(index);
-              pushed = false;
-
-            }
+            field = field + line.charAt(index);
+            pushed = false;
 
           }
 
-          if (!pushed) valueArray.push(field);
         }
 
-      });
-
-      var i = 0;
-      var obj = {};
-      for (let increment = 0; increment < valueArray.length; increment++) {
-
-        if (i === nameArray.length) {
-          i = 0;
-          contArray.push(obj);
-          obj = {};
-
-        }
-
-        obj[nameArray[i]] = valueArray[increment];
-        i++;
+        if (!pushed) valueArray.push(field);
       }
 
-      contArray.push(obj);
+    });
 
-      JSONObj[dataName] = contArray;
+    var i = 0;
+    var obj = {};
+    for (let increment = 0; increment < valueArray.length; increment++) {
 
-    } else {
+      if (i === nameArray.length) {
+        i = 0;
+        contArray.push(obj);
+        obj = {};
 
-      var dataName = dataArray.join("").trim().split(".")[0];
+      }
 
-      dataArray = dataArray.join(" ").trim().split(dataName + ".").filter(v => v != '');
-
-      var subObj = {};
-
-      dataArray.forEach(line => {
-        line = line.trim();
-        var id = line.split(" ")[0];
-        line = line.replace(id, "").trim();
-        line = line.split("'").join("");
-        subObj[id] = line;
-      });
-
-      JSONObj[dataName] = subObj;
-
+      obj[nameArray[i]] = valueArray[increment];
+      i++;
     }
 
-    return JSONObj;
+    contArray.push(obj);
+
+    JSONObj[dataName] = contArray;
+
+  } else {
+
+    var dataName = dataArray.join("").trim().split(".")[0];
+
+    dataArray = dataArray.join(" ").trim().split(dataName + ".").filter(v => v != '');
+
+    var subObj = {};
+
+    dataArray.forEach(line => {
+      line = line.trim();
+      var id = line.split(" ")[0];
+      line = line.replace(id, "").trim();
+      line = line.split("'").join("");
+      subObj[id] = line;
+    });
+
+    JSONObj[dataName] = subObj;
 
   }
 
+  return JSONObj;
+
+}
+
+
+module.exports = {
+  getObject
 }
