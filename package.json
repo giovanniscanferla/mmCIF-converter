@@ -1,0 +1,15 @@
+{
+  "name": "mmCIF-converter",
+  "version": "1.0.0",
+  "description": "A mmCIF file to JS Object parser that allows to create an object from the protein.cif file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Giovanni Scanferla",
+  "license": "ISC",
+  "keywords": ["node", "npm", "CIF", "mmCIF", "PDB", "protein"],
+  "dependencies": {
+    "filereader": "^0.10.3"
+  }
+}
